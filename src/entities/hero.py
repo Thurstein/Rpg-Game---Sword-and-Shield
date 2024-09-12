@@ -129,8 +129,8 @@ class Shield_hero(Entity):
 
 
 class Sword_hero(Entity):
-    def __init__(self,name,level, x, y, sword):
-        super().__init__(name,level, x, y)
+    def __init__(self, name, level, x, y, sword):
+        super().__init__(name, level, x, y)
         self.image_path = "assets/images/players/sword hero/idle/1.png"
         # Stats
         self.health = int(25*np.log(self.level)+80)            # Salud baja
@@ -145,33 +145,65 @@ class Sword_hero(Entity):
         self.sword = sword
         # Animación
         self.animations = import_folder('assets/images/players/sword hero/idle/')
+        self.attacking = False  # Variable para controlar el ataque
+        self.attack_animation_finished = False
+
+    def animate(self):
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(self.animations):
+            self.frame_index = 0
+            # Si estamos en ataque y se completó la animación, marcamos el ataque como terminado
+            if self.attacking:
+                self.attacking = False
+                self.attack_animation_finished = True  # Esto evita el reinicio inmediato de la animación
+
+        self.image = pygame.transform.scale(self.animations[int(self.frame_index)], (90, 90))
+        if not self.facing_right:
+            self.image = pygame.transform.flip(self.image, True, False)
 
     def update(self, keys_pressed):
         """Actualiza la posición en base a las teclas presionadas (movimiento básico)."""
         
-        # Por defecto, el estado es 'idle'
-        initial_position = self.rect.topleft  # Guardamos la posición inicial para comparar después
+        # Solo permitimos movimiento si no estamos atacando
+        if not self.attacking:
+            initial_position = self.rect.topleft  # Guardamos la posición inicial para comparar después
 
-        # Movimiento horizontal
-        if keys_pressed[pygame.K_a]:
-            self.rect.x -= self.movement_speed
-            self.facing_right = False
-        elif keys_pressed[pygame.K_d]:
-            self.rect.x += self.movement_speed
-            self.facing_right = True
+            # Movimiento horizontal
+            if keys_pressed[pygame.K_a]:
+                self.rect.x -= self.movement_speed
+                self.facing_right = False
+            elif keys_pressed[pygame.K_d]:
+                self.rect.x += self.movement_speed
+                self.facing_right = True
 
-        # Movimiento vertical
-        if keys_pressed[pygame.K_w]:
-            self.rect.y -= self.movement_speed
-        elif keys_pressed[pygame.K_s]:
-            self.rect.y += self.movement_speed
+            # Movimiento vertical
+            if keys_pressed[pygame.K_w]:
+                self.rect.y -= self.movement_speed
+            elif keys_pressed[pygame.K_s]:
+                self.rect.y += self.movement_speed
 
-        # Detectar si ha habido algún cambio en la posición
-        movement_detected = self.rect.topleft != initial_position
+            # Detectar si ha habido algún cambio en la posición
+            movement_detected = self.rect.topleft != initial_position
+            # Actualizar el estado en base a si se detectó movimiento
+            self.status = 'walk' if movement_detected else 'idle'
 
-        # Actualizar el estado en base a si se detectó movimiento
-        self.status = 'walk' if movement_detected else 'idle'
+        # Movimiento de ataque (con prioridad sobre otros estados)
+        if keys_pressed[pygame.K_SPACE] and not self.attacking:
+            self.status = 'action'
+            self.attacking = True
+            self.attack_animation_finished = False
+            print("Atacando")
+
+        # Si estamos atacando, mantener la animación de ataque
+        if self.attacking:
+            self.status = 'action'
+            self.animations = import_folder(f'assets/images/players/sword hero/{self.status}/')
 
         # Actualiza las animaciones y el estado
         self.animations = import_folder(f'assets/images/players/sword hero/{self.status}/')
         self.animate()
+
+        # Reinicia la animación al finalizar el ataque
+        if self.attack_animation_finished:
+            self.status = 'idle'
+            self.attack_animation_finished = False
