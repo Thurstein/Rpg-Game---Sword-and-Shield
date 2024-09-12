@@ -1,2 +1,2 @@
 # states.py
-states= ['title', 'game', 'pause', 'exit']
+states = ['title', 'game', 'pause', 'exit']

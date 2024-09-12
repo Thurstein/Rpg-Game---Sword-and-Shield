@@ -1,13 +1,9 @@
 import pygame, os
 from utils.title_maker import draw_text_with_border
-from utils.music_manager import MusicManager  # Importar el administrador de música
 
 class Menu:
     def __init__(self, screen):
         self.screen = screen
-        # Reproducir la música de título
-        self.music_manager = MusicManager()
-        self.music_manager.play_bgm('title_bgm01.mp3', volume=0.5)
         # Cargar la fuente personalizada
         self.font_path = os.path.join('assets', 'fonts', 'JMHarkhamRegular.ttf')
         self.font = pygame.font.Font(self.font_path, 50)  # Tamaño 50 para las opciones
@@ -64,7 +60,7 @@ class Menu:
         self.screen.blit(background_image_scaled, (0, 0))
 
         # Dibujar el título con borde negro y centrado
-        title_text = "My RPG Game"
+        title_text = "Sword and Shield"
         title_position = (self.screen.get_width() // 2, 100)  # Centrado horizontalmente en la parte superior
         draw_text_with_border(
             self.screen,  # Pasar la pantalla como primer argumento

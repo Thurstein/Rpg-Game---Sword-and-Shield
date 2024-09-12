@@ -3,7 +3,7 @@ from pygame.locals import QUIT
 from game import Game
 from ui.menu import Menu
 from ui.pause import PauseMenu
-from utils.states import states
+from utils.music_manager import MusicManager
 
 # Ajustar el PYTHONPATH para incluir el directorio raíz del proyecto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -15,10 +15,6 @@ def initialize_game():
     pygame.display.set_caption('My RPG Game')
     return screen
 
-def handle_quit():
-    pygame.quit()
-    sys.exit()
-
 def update_menu(menu, keys_pressed):
     menu.update(keys_pressed)
     menu.draw()
@@ -29,9 +25,8 @@ def update_game(game, keys_pressed):
 
 def main():
     screen = initialize_game()
-    pygame.mixer.init()  # Inicializa el mixer de sonido
+    music_manager = MusicManager()
     clock = pygame.time.Clock()  # Controla el frame rate
-    
     # Inicializa el menú
     menu = Menu(screen)
     pause = PauseMenu(screen)
@@ -46,7 +41,7 @@ def main():
     while running:
         for event in pygame.event.get():
             if event.type == QUIT:
-                handle_quit()
+                game.handle_quit()
 
         keys_pressed = pygame.key.get_pressed()
 
@@ -61,7 +56,7 @@ def main():
                     game = Game(screen)
                     in_title = False
                 elif selected_option == menu.options[2]:
-                    handle_quit()
+                    game.handle_quit()
 
         elif in_pause:
             # Si estamos en el menú de pausa, dibujamos solo una vez la superposición y luego actualizamos el menú
@@ -85,7 +80,7 @@ def main():
                     in_title = True
                     in_pause = False
                 elif selected_option == pause.options[3]:
-                    handle_quit()
+                    game.handle_quit()
 
         else:
             # Si estamos en el juego
